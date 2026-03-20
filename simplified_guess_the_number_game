@@ -1,0 +1,51 @@
+import random
+import art
+
+def play_game(attempts):
+    chosen_number = random.randint(1, 100)
+
+    while attempts > 0:
+        print(f"You have {attempts} attempts remaining to guess the number.")
+        try:
+            guess = int(input("Make a guess: "))
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+            continue
+
+        if guess < chosen_number:
+            print("Too low.")
+        elif guess > chosen_number:
+            print("Too high.")
+        else:
+            print("You got it! Congratulations!")
+            return  # exits the function if correct
+
+        attempts -= 1
+
+    print("You lost! Maybe next time!")
+    print(f"The number was: {chosen_number}")
+
+
+print(art.logo)
+print("Welcome to the Number Guessing Game!")
+print("I am thinking of a number between 1 and 100")
+
+while True:
+    difficulty = input("Choose a difficulty ('easy' or 'hard'): ").lower().strip()
+
+    if difficulty == "easy":
+        play_game(10)
+    elif difficulty == "hard":
+        play_game(5)
+    else:
+        print("Invalid input. Try again.")
+        continue
+
+    again = input("Play again? ('yes' or 'no'): ").lower().strip()
+    if again == "no":
+        break
+
+    print("\n" * 50)
+    print(art.logo)
+
+print("\nGame over! Thanks for playing!
