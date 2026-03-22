@@ -1,0 +1,53 @@
+import random
+import os
+
+from game_data import data
+import art
+score = 0
+def format_person(person):
+    return f"{person['name']}, a {person['description']} from {person['country']}"
+def get_new_person(exclude):
+    new_person = random.choice(data)
+    while new_person == exclude:
+        new_person = random.choice(data)
+    return new_person
+
+random_person = random.sample(data, 2)
+person_a = random_person[0]
+person_b = random_person[1]
+
+while person_b == person_a:
+    person_b = random.choice(data)
+game_over = False
+while not game_over:
+    # Clear screen each round
+    if os.name == "nt":
+        os.system("cls")
+    else:
+        os.system("clear")
+
+    person_1_followers = person_a['follower_count']
+    person_2_followers = person_b['follower_count']
+
+    print(art.logo)
+    print(f"Compare A: {format_person(person_a)}")
+    print(art.vs)
+    print(f"Compare B: {format_person(person_b)}")
+
+    user_guess = input("Who has more followers? Type 'A' or 'B': ").lower()
+
+    if user_guess == "a" and person_1_followers > person_2_followers:
+        score += 1
+        print(f"You're right! Your current score: {score}")
+        person_a = person_b
+        person_b = get_new_person(person_a)
+
+    elif user_guess == "b" and person_2_followers > person_1_followers:
+        score += 1
+        print(f"You're right! Your current score: {score}")
+        person_a = person_b
+        person_b = get_new_person(person_a)
+
+    else:
+        print(f"Sorry that is incorrect. Your final score is: {score}")
+        game_over = True
