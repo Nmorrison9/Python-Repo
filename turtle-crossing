@@ -1,0 +1,96 @@
+import time
+from turtle import Screen, Turtle
+from lives import Lives
+from player import Player
+from car_manager import CarManager
+from scoreboard import Scoreboard
+
+screen = Screen()
+screen.setup(width=600, height=600)
+screen.tracer(0)
+screen.bgcolor("gray20")
+screen.update()
+
+def draw_edges():
+    edge = Turtle()
+    edge.hideturtle()
+    edge.penup()
+    edge.color("white")
+    edge.pensize(4)
+
+    for y in [-260, 260]:
+        edge.goto(-300, y)
+        edge.setheading(0) 
+        edge.pendown()
+        edge.forward(600)
+        edge.penup()
+
+def draw_lane_lines():
+    drawer = Turtle()
+    drawer.hideturtle()
+    drawer.penup()
+    drawer.color("yellow")
+    drawer.pensize(3)
+
+    # Draw dashed lines between lanes
+    for y in range(-220, 260, 40): 
+        drawer.goto(-300, y)
+
+        for _ in range(30): 
+            drawer.pendown()
+            drawer.forward(10)
+            drawer.penup()
+            drawer.forward(10)
+
+draw_edges()
+draw_lane_lines()
+safe_zone = Turtle()
+safe_zone.penup()
+safe_zone.color("green")
+safe_zone.shape("square")
+safe_zone.goto(0, 0)
+safe_zone.shapesize(2, 30)
+
+terry = Player()
+
+screen.listen()
+screen.onkey(terry.move_up, "Up")
+screen.onkey(terry.move_down, "Down")
+screen.onkey(terry.move_left, "Left")
+screen.onkey(terry.move_right, "Right")
+scoreboard = Scoreboard()
+lives = Lives()
+lives.update()
+scoreboard.update()
+
+car = CarManager()
+
+game_is_on = True
+
+
+while game_is_on:
+    time.sleep(0.1)
+    screen.update()
+    car.new_car()
+    car.move()
+
+    if terry.ycor() >= 280:
+        terry.finish_line()
+        scoreboard.increase_score()
+        car.increase_speed()
+        scoreboard.update()
+
+    for c in car.all_cars:
+        car_width = c.shapesize()[1] * 10  # stretch_len * 10px
+        if abs(c.xcor() - terry.xcor()) < car_width + 10 and abs(c.ycor() - terry.ycor()) < 20:
+            lives.decrease_lives()
+            terry.goto(0, -280)
+            lives.update()
+
+    if lives.lives == 0:
+        scoreboard.game_over()
+        game_is_on = False
+
+
+
+screen.exitonclick()
