@@ -1,0 +1,19 @@
+from turtle import Turtle
+
+FONT = ("Courier", 24, "normal")
+
+class Lives(Turtle):
+    def __init__(self):
+        super().__init__()
+        self.lives = 3
+        self.color("Black")
+        self.penup()
+        self.hideturtle()
+        self.goto(200, 260)
+
+    def update(self):
+        self.clear()
+        self.write(f"Lives: {self.lives}", align="center", font=FONT)
+
+    def decrease_lives(self):
+        self.lives -= 1
