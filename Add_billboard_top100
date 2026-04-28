@@ -1,0 +1,66 @@
+from bs4 import BeautifulSoup
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+
+uri= "YOURURI"
+client_id = "YOURCLIENTID"
+client_secret = "YOURSECRET"
+scope = "playlist-modify-private"
+
+CLIENT_ID = client_id
+CLIENT_SECRET = client_secret
+REDIRECT_URI = uri
+
+
+sp = spotipy.Spotify(
+    auth_manager=SpotifyOAuth(
+        scope="playlist-modify-private",
+        redirect_uri=REDIRECT_URI,
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        show_dialog=True,
+        cache_path="token.txt",
+        username="YOURUSERNAME",
+    )
+)
+user_id = sp.current_user()["id"]
+time_period = input("Which year do you want to travel to? Type the date in this format YYYY-MM-DD: ")
+year = time_period.split("-")[0]
+
+headers = {
+    "date": time_period
+}
+
+url="https://appbrewery.github.io/bakeboard-hot-100/2026-04-18/"
+
+header = {
+    'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0"
+}
+
+response = requests.get(url=url, headers=header )
+soup = BeautifulSoup(response.content, "html.parser")
+
+rank_tags = soup.find_all("span", class_="chart-entry__rank-number")
+rank = [rank.getText() for rank in rank_tags]
+
+song_title_tags = soup.find_all("h3", class_="chart-entry__title")
+song_title = [title.getText() for title in song_title_tags]
+
+song_artist_tags = soup.find_all("span", class_="chart-entry__artist")
+song_artist = [artist.getText() for artist in song_artist_tags]
+
+song_uris = []
+
+for song in song_title:
+    result = sp.search(q=f"track:{song} year:{year}", type="track")
+    try:
+        uri = result["tracks"]["items"][0]["uri"]
+        song_uris.append(uri)
+    except IndexError:
+        print(f"{song} doesn't exist in Spotify. Skipped.")
+
+playlist = sp.current_user_playlist_create(name=F"{time_period} Billboard 100", public=False, description=f"Billboard Top 100 for the week of {time_period}")
+
+playlist_id = playlist["id"]
+
+add_tracks = sp.playlist_add_items(playlist_id=playlist_id, items=song_uris,)
